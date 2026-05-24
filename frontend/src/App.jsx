@@ -1,16 +1,17 @@
 /**
  * Root Application Component
  *
- * Sets up the React Router and global layout (Navbar + Footer).
- * Protected routes are wrapped with ProtectedRoute component.
- * Additional routes will be added in subsequent phases.
+ * Sets up React Router, global layout, and toast notifications.
+ * Routes are organized by access level: public, protected, admin.
  */
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ToastContainer from './components/common/Toast';
 import Home from './pages/Home';
+import About from './pages/About';
 import NotFound from './pages/NotFound';
 import './styles/App.css';
 
@@ -18,29 +19,42 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <ToastContainer />
         <div className="app-container">
           <Navbar />
           <main className="main-content">
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
 
-              {/* Phase 4: Auth routes */}
+              {/* Auth Routes (upcoming) */}
               {/* <Route path="/login" element={<Login />} /> */}
               {/* <Route path="/register" element={<Register />} /> */}
+              {/* <Route path="/forgot-password" element={<ForgotPassword />} /> */}
 
-              {/* Phase 6: Product routes */}
+              {/* Product Routes (upcoming) */}
               {/* <Route path="/products" element={<Products />} /> */}
               {/* <Route path="/products/:id" element={<ProductDetail />} /> */}
 
-              {/* Phase 6: Protected cart route */}
+              {/* Protected Customer Routes (upcoming) */}
               {/* <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} /> */}
-
-              {/* Phase 7: Protected checkout route */}
               {/* <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} /> */}
+              {/* <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} /> */}
+              {/* <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} /> */}
+              {/* <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /> */}
 
-              {/* Phase 10: Trust/Policy pages */}
+              {/* Trust/Policy Pages (upcoming) */}
               {/* <Route path="/privacy-policy" element={<PrivacyPolicy />} /> */}
+              {/* <Route path="/security" element={<SecurityInfo />} /> */}
+
+              {/* Admin Routes (upcoming) */}
+              {/* <Route path="/admin/login" element={<AdminLogin />} /> */}
+              {/* <Route path="/admin/dashboard" element={<AdminRoute><Dashboard /></AdminRoute>} /> */}
+              {/* <Route path="/admin/products" element={<AdminRoute><ProductManagement /></AdminRoute>} /> */}
+              {/* <Route path="/admin/orders" element={<AdminRoute><OrderManagement /></AdminRoute>} /> */}
+              {/* <Route path="/admin/users" element={<AdminRoute><UserManagement /></AdminRoute>} /> */}
+              {/* <Route path="/admin/audit" element={<AdminRoute><AuditLogs /></AdminRoute>} /> */}
 
               {/* 404 Catch-All */}
               <Route path="*" element={<NotFound />} />

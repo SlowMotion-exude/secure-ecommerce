@@ -4,60 +4,62 @@
  * Provides global authentication state to the entire React app.
  * - Tracks whether the user is authenticated
  * - Stores user information (from JWT decode)
- * - Provides login/logout/register functions
+ * - Provides login/logout functions
  *
  * Components access auth state via useAuth() hook.
- * Full implementation in Phase 4 & 12.
  */
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+function getInitialAuthState() {
+  const token = localStorage.getItem('accessToken');
+  if (!token) return { user: null, isAuthenticated: false };
 
-  // Check for existing token on mount
-  useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      try {
-        // Decode JWT payload (base64) to get user info
-        const payload = JSON.parse(atob(token.split('.')[1]));
-
-        // Check if token is expired
-        if (payload.exp * 1000 > Date.now()) {
-          setUser({ id: payload.userId, email: payload.email, role: payload.role });
-          setIsAuthenticated(true);
-        } else {
-          localStorage.removeItem('accessToken');
-        }
-      } catch {
-        localStorage.removeItem('accessToken');
-      }
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.exp * 1000 > Date.now()) {
+      return {
+        user: { id: payload.userId, email: payload.email, role: payload.role },
+        isAuthenticated: true,
+      };
     }
-    setLoading(false);
-  }, []);
+  } catch {
+    // Invalid token
+  }
+
+  localStorage.removeItem('accessToken');
+  return { user: null, isAuthenticated: false };
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+
+export function AuthProvider({ children }) {
+  const [authState, setAuthState] = useState(getInitialAuthState);
 
   const login = useCallback((accessToken, userData) => {
     localStorage.setItem('accessToken', accessToken);
-    setUser(userData);
-    setIsAuthenticated(true);
+    setAuthState({ user: userData, isAuthenticated: true });
   }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem('accessToken');
     localStorage.removeItem('csrfToken');
-    setUser(null);
-    setIsAuthenticated(false);
+    setAuthState({ user: null, isAuthenticated: false });
   }, []);
 
   const value = {
-    user,
-    isAuthenticated,
-    loading,
+    user: authState.user,
+    isAuthenticated: authState.isAuthenticated,
+    loading: false,
     login,
     logout,
   };
@@ -67,14 +69,6 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 }
 
 export default AuthContext;
