@@ -9,7 +9,8 @@
  * Components access auth state via useAuth() hook.
  */
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { fetchCsrfToken } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -44,6 +45,10 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [authState, setAuthState] = useState(getInitialAuthState);
+
+  useEffect(() => {
+    fetchCsrfToken();
+  }, []);
 
   const login = useCallback((accessToken, userData) => {
     localStorage.setItem('accessToken', accessToken);
